@@ -2,7 +2,7 @@ import Get_Rappor
 import Get_Params
 import numpy
 import copy
-import lasso
+#import lasso
 from copy import copy, deepcopy
 from itertools import product,combinations
 from random import randint
