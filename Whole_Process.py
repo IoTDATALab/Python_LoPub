@@ -37,7 +37,7 @@ dt=0.01
 readlimit=50000
 samplerate=0.1   # from 0.01, 0.05, 0.1, 0.5, 1
 sparse_rate=0.05
-for file_id in [4,2]:
+for file_id in [4,2,3]:
     if file_id==4:
         fai_list=[0.2,0.99]
         col_list=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
