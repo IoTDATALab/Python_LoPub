@@ -59,8 +59,8 @@ def lasso_regression2(bit_cand_list,bitsum_list):
         #print(bit_cand_list[i],bitsum_list[i])
         x=map(list, zip(*bit_cand_list[i]))
         y=bitsum_list[i]
-        #clf=LinearRegression()
-        clf = Lasso(alpha=1.0)
+        clf=LinearRegression()
+        #clf = Lasso(alpha=1.0)
         #clf=ElasticNet(alpha=1.0, l1_ratio=2.0)
         m=clf.fit(x, y)
         

@@ -31,13 +31,13 @@ fai_C=0.55   #from 0.2, 0.3, 0.4, 0.5
 #f=0.5 # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
 # bloombit=128
 # hashbit=16
-bloombit=8
-hashbit=5
+bloombit=128
+hashbit=16
 dt=0.01
 readlimit=50000
 samplerate=0.1   # from 0.01, 0.05, 0.1, 0.5, 1
 sparse_rate=0.05
-for file_id in [4,2,3]:
+for file_id in [3,4,2]:
     if file_id==4:
         fai_list=[0.2,0.99]
         col_list=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -91,7 +91,7 @@ for file_id in [4,2,3]:
                 [True_jtree, True_root, True_cliques, True_B, True_w]=graph.graph_to_jtree(TrueDG,TrueNS)
                 print(True_cliques)
                 #print(True_jtree)
-                print('true prob:',freqrate2)  
+                print('true prob:',freqrate1)  
                 #exit(0)
                 ########################################################################## Write Into Files#############################################################################
                 
@@ -288,7 +288,7 @@ for file_id in [4,2,3]:
                     m2=m2+t2
                     print (' ')
                     print('col:',col,' ',t1,t2)
-            print ('file:',file_id,m1/leng,m2/leng)
+            print ('file:',file_id,'f:',f,m1/leng,m2/leng)
             write_list=[[fai_C,f,m1/leng,m2/leng,sparse_rate]]
             print(write_list)
             os.chdir('C:\Users\Ren\workspace2\DisHD\output')

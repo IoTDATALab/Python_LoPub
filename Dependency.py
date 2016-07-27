@@ -98,8 +98,9 @@ def Get_Dep_Graph(att_num,node_num,origin_node_num,rowlist,multilist,num_bloom_b
             #p_comb=(Estimate_Joint_Distribution.estimate_2d(bit_list[i], bit_list[j], bit_cand_list[i], bit_cand_list[j], f, 0.001))
             p_comb2=Estimate_Joint_Distribution.estimate_2d2(bit_cand_list[i], bit_cand_list[j], bitsum_list, [i,j])
             p_comb=p_comb2
-            #print('p comb:',p_comb)
-            print('p_comb2:',p_comb2)
+            if (i%10==0):
+                #print('p comb:',p_comb)
+                print('p_comb2:',i,j,p_comb2)
             p_comb_list.append(p_comb)
             
             #p_single1=[sum(eachlist) for eachlist in p_comb2]
