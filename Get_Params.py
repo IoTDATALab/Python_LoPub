@@ -195,8 +195,31 @@ def get_B(str_x,e):
         bit_array.append(int(each_char))  
     return bit_array
 
+def get_B_basic(strx,e,rand_base=0):
+    leng=e.params.num_bloombits
+    bit_array=[0 for i in range(leng)]
+    loc=int(strx)-rand_base-1
+    bit_array[loc]=1
+    return bit_array
+
+def get_S_basic(strx,e,rand_base=0):
+    leng=e.params.num_bloombits
+    f=e.params.prob_f
+    bit_array=get_B_basic(strx, e, rand_base=0)
+    for i in range(leng):
+        if random.random()<=1-f :
+            continue
+        else: 
+            if random.random()<=0.5:
+                bit_array[i]=0
+            else:
+                bit_array[i]=1
+    return bit_array              
+        
 # for i in range(10):
-#     set_rappor_params(32, 4, 0.5)
+# e=set_rappor_params(32, 4, 2,0.5)
+# print(get_B_basic('32', e))
+# print(get_S_basic('2', e))
 
 # att_num,node_num,rowlist,multilist=get_file_info(4,10000)
 # freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist=get_static_info(att_num, node_num, rowlist, multilist)
