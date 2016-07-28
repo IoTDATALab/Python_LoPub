@@ -36,8 +36,12 @@ hashbit=16
 dt=0.01
 readlimit=50000
 samplerate=0.1   # from 0.01, 0.05, 0.1, 0.5, 1
-sparse_rate=0.05
-for file_id in [3,4,2]:
+sparse_rate=0.0
+if sparse_rate==0.0:
+    get_rid_flag=False
+else:
+    get_rid_flag=True
+for file_id in [2,4,2]:
     if file_id==4:
         fai_list=[0.2,0.99]
         col_list=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -74,7 +78,7 @@ for file_id in [3,4,2]:
                 os.makedirs(r'%s/%s'%(os.getcwd(),folder_l))
                 folder=folder_l
                 
-                att_num,node_num,true_node_num,rowlist,multilist,bit_cand_list,bit_list,bitsum_list=Get_Rappor.Get_rid_sparse(file_id, readlimit, samplerate, bloombit, hashbit, f, sparse_rate)
+                att_num,node_num,true_node_num,rowlist,multilist,bit_cand_list,bit_list,bitsum_list=Get_Rappor.Get_rid_sparse(file_id, readlimit, samplerate, bloombit, hashbit, f, sparse_rate,get_rid_flag)
                 
                 
                 #att_num,node_num,true_node_num,rowlist,multilist=Get_Params.get_file_info(file_id,readlimit,samplerate)
