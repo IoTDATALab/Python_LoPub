@@ -105,7 +105,7 @@ def get_file_info(input_id, readlimit,samplerate):
         i=i+1
     fp.close()
     #print(multilist)
-    
+    random.seed(10)
     samplesize=int(node_num*samplerate)
     multilist=random.sample(multilist,samplesize)
     true_node_num=node_num
