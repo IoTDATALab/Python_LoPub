@@ -166,20 +166,9 @@ def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2si
     N=len(att1data_rappor_list)
     p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]
     p_result=[[0.0 for j in range(n)]for i in range(m)]
-    #print(att2signal_list)
-    #print(att1signal_list,att2signal_list)
-    #temp=[[0.0 for i in range(n)]for j in range(m)]
-    #deltap=deepcopy(p)
+
+
     for i_time in range(50):
-        #temp=deepcopy(p)
-        #print('temp',temp)
-        
-        #maxp=numpy.max(deltap)
-        #print('maxp',maxp)
-        #if maxp<(dt/(m*n)):
-            #break
-        #pass        
-        #deltap=deepcopy(p)
         for i in range(m):
             for j in range(n):
                 fenzi=0.0
@@ -187,10 +176,7 @@ def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2si
                     #kk=randint(0,N-1)
                     fenzi+=get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
                 p[i][j]=fenzi*1.0/N
-                #p[i][j]=fenzi*1.0/N
-            #print('Estimate:',i,'of',m)
-                #deltap[i][j]=deepcopy(abs(p[i][j]-temp[i][j]))
-        #print(i_time,'p:',p)
+
         sump=0.0
         for i in range(m):
             for j in range(n):

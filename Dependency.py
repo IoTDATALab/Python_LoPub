@@ -98,7 +98,7 @@ def Get_Dep_Graph(att_num,node_num,origin_node_num,rowlist,multilist,num_bloom_b
             #p_comb=(Estimate_Joint_Distribution.estimate_2d(bit_list[i], bit_list[j], bit_cand_list[i], bit_cand_list[j], f, 0.001))
             p_comb2=Estimate_Joint_Distribution.estimate_2d2(bit_cand_list[i], bit_cand_list[j], bitsum_list, [i,j])
             p_comb=p_comb2
-            if (i%10==0):
+            if (j==5):
                 #print('p comb:',p_comb)
                 print('p_comb2:',i,j,p_comb2)
             p_comb_list.append(p_comb)
@@ -121,7 +121,7 @@ def Get_Dep_Graph(att_num,node_num,origin_node_num,rowlist,multilist,num_bloom_b
                 DepenGraph[i][j]=1
                 DepenGraph[j][i]=1
             #print('Computing the mutual information:',i,j,Mi,Mi2,theta)
-        p_single_list.append(p_single1)
+        p_single_list.append(p_single)
     ns=[[1 for i in range(att_num)]]
     return CorrMatrix,DepenGraph,ns,att_num,node_num,origin_node_num,rowlist,multilist,bit_cand_list,bit_list,bitsum_list,p_comb_list,p_single_list
 

@@ -3,7 +3,8 @@ import numpy
 import scipy
 import copy
 from sklearn.linear_model import Lasso, LinearRegression
-from sklearn.linear_model.coordinate_descent import ElasticNet
+from sklearn.linear_model.bayes import BayesianRidge
+#from sklearn.linear_model.coordinate_descent import ElasticNet
 #from sklearn.linear_model.coordinate_descent import enet_path
 #from Evaluation_Marginal import readlimit
 
@@ -40,12 +41,12 @@ def rappor_process(num_bloombits,num_hash,f,num_att,num_node,origin_node_num,lis
             e=Get_Params.set_rappor_params(num_bloombits, num_hash,num_att,f)
             bit_cand_list[i][j]=Get_Params.get_S(list_att[i][j],e)
             
-    tempbitsum_list=(numpy.array(bitsum_list)-(0.5*f)*num_node)/(1-f)
-    #print(tempbitsum_list)
+    tempbitsum_list=(numpy.array(bitsum_list)-(0.5*f)*num_node)/(1.0-f)
+    print(tempbitsum_list)
     bitsum_list=tempbitsum_list.tolist()
     
-    print('f:',f,'sample B:',bit_list[0][0])
-    print('f:',f,'sample S:',bit_cand_list[0][0])
+    #print('f:',f,'sample B:',bit_list[0][0])
+    #print('f:',f,'sample S:',bit_cand_list[0][0])
             
     return bit_cand_list, bit_list, bitsum_list
 
@@ -80,8 +81,9 @@ def lasso_regression(bit_cand_list,bitsum_list):
         #print(bit_cand_list[i],bitsum_list[i])
         x=map(list, zip(*bit_cand_list[i]))
         y=bitsum_list[i]
-        #clf=LinearRegression()
+        #clf=LinearRegression(fit_intercept=False,copy_X=True)
         clf = Lasso(alpha=1.0)
+        #clf=BayesianRidge()
         #clf=ElasticNet(alpha=0.1, l1_ratio=2.0)
         m=clf.fit(x, y)
         coef=clf.coef_
@@ -91,28 +93,32 @@ def lasso_regression(bit_cand_list,bitsum_list):
          
     return lasso_cf
 
-def Get_rid_sparse(file_id,readlimit,samplerate,bloombit,hashbit,f,sparse_rate): 
+def Get_rid_sparse(file_id,readlimit,samplerate,bloombit,hashbit,f,sparse_rate,get_rid_flag=True): 
 #def Get_rid_sparse(bit_cand_list,bitsum_list,att_num,node_num,true_node_num,rowlist,multilist,sparse_rate): 
     
     att_num,node_num,true_node_num,rowlist,multilist=Get_Params.get_file_info(file_id,readlimit,samplerate)
     bit_cand_list,bit_list,bitsum_list=rappor_process(bloombit, hashbit, f,att_num,node_num,true_node_num,rowlist,multilist)
             
-    
-    p_single=lasso_regression(bit_cand_list, bitsum_list)
-    #print(p_single)
-    for i in range(att_num):
-        lengi=len(p_single[i])
-        rowcopy=copy.copy(rowlist[i])
-        for j in range(lengi):
-            if p_single[i][j]<sparse_rate:
-                rowcopy.remove(rowlist[i][j])
-                for k in range(node_num):
-                    if multilist[k][i]==rowlist[i][j]:
-                        multilist[k][i]='99'
-        rowlist[i]=rowcopy
-        if len(rowlist[i])<lengi:
-            rowlist[i].append('99')
-    bit_cand_list3,bit_list3,bitsum_list3=rappor_process(bloombit, hashbit, f,att_num,node_num,true_node_num,rowlist,multilist)
+    if get_rid_flag==True :  
+        p_single=lasso_regression(bit_cand_list, bitsum_list)
+        #print(p_single)
+        for i in range(att_num):
+            lengi=len(p_single[i])
+            rowcopy=copy.copy(rowlist[i])
+            for j in range(lengi):
+                if p_single[i][j]<sparse_rate:
+                    rowcopy.remove(rowlist[i][j])
+                    for k in range(node_num):
+                        if multilist[k][i]==rowlist[i][j]:
+                            multilist[k][i]='99'
+            rowlist[i]=rowcopy
+            if len(rowlist[i])<lengi:
+                rowlist[i].append('99')
+        bit_cand_list3,bit_list3,bitsum_list3=rappor_process(bloombit, hashbit, f,att_num,node_num,true_node_num,rowlist,multilist)
+    else:
+        bit_cand_list3=bit_cand_list
+        bit_list3=bit_list
+        bitsum_list3=bitsum_list
     return att_num,node_num,true_node_num,rowlist,multilist,bit_cand_list3,bit_list3,bitsum_list3
                       
 ########################################################################################################################################################################################    
