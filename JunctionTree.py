@@ -78,7 +78,7 @@ def simple_conditiondata_combin(data_list, loc_list):
 
 #def pairwise_independent_margin(first_att_index,second_att_index,p_comb_list,row_list):
 
-def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):   
+def independent_marginal(clique,bit_list,bit_cand_list,row_list,bitsum_list,f,dt):   
     ##################################################################
     # To generate independent probability and possible list for sampling
     leng=len(clique)
@@ -87,7 +87,8 @@ def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):
     if leng<=2:
         att_index1=clique[0]
         att_index2=clique[leng-1]
-        proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], f, dt)
+        #proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], f, dt)
+        proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], bitsum_list,clique,f, dt)
         proleng=len(proe)
         for i in range(proleng):    
             pro.extend(proe[i])
@@ -99,10 +100,10 @@ def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):
         #print(att_index1)
         #print(att_indexs)
         att_rappor_list_combine,att_signal_list_combine,att_row_list_combine=att_combin(bit_list,bit_cand_list,row_list,att_indexs)
-        #print('rowlist combine',att_row_list_combine)
+        #print('rowlist combine',att_row_list_combine)    att_combin(bit_list,bit_cand_list,row_list,att_indexs)
         #print(att_row_list_combine)
         #proe=estimate_2d2(bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique)
-        proe=estimate_2d(bit_list[att_index1],att_rappor_list_combine,bit_cand_list[att_index1],att_signal_list_combine,f,dt)
+        proe=estimate_2d(bit_list[att_index1],att_rappor_list_combine,bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique,f,dt)
         proleng=len(proe)
         for i in range(proleng):    
             pro.extend(proe[i])
