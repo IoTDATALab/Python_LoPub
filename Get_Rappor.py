@@ -27,6 +27,7 @@ def rappor_process(num_bloombits,num_hash,f,num_att,num_node,origin_node_num,lis
     for i in range(num_node):
         for j in range(num_att):
             #print(list_data[i][j],type(list_data[i][j]))
+
             e=Get_Params.set_rappor_params(num_bloombits, num_hash,num_att,f)
             bit_list[i][j]=Get_Params.get_B(list_data[i][j], e)
             #print(bit_list[i][j])
@@ -38,6 +39,7 @@ def rappor_process(num_bloombits,num_hash,f,num_att,num_node,origin_node_num,lis
             
     for i in range(num_att):
         for j in range(len(list_att[i])):
+
             e=Get_Params.set_rappor_params(num_bloombits, num_hash,num_att,f)
             bit_cand_list[i][j]=Get_Params.get_S(list_att[i][j],e)
             
@@ -55,20 +57,52 @@ def rappor_process(num_bloombits,num_hash,f,num_att,num_node,origin_node_num,lis
 def lasso_regression2(bit_cand_list,bitsum_list):
     #################
     ################### this function is used for all the data, no
+    len_att=len(bit_cand_list)
     lasso_cf=[] 
-    for i in range(len(bit_cand_list)):
+    
+    
+    #nz_sum_list=[]
+    
+    for i in range(len_att):
         #print(bit_cand_list[i],bitsum_list[i])
+        
         x=map(list, zip(*bit_cand_list[i]))
         y=bitsum_list[i]
-        clf=LinearRegression()
-        #clf = Lasso(alpha=1.0)
+        
+        
+        #print(x,y)
+        #clf=LinearRegression()
+        clf = Lasso(alpha=1.0)
         #clf=ElasticNet(alpha=1.0, l1_ratio=2.0)
         m=clf.fit(x, y)
         
         coef=clf.coef_
+        len_cand=len(coef)
+        cf=[0.0 for k in range(len_cand)]
+        #print(coef)
+        nz_loc=[]
+        nz_cand_list=[]
+        for j in range(len_cand):
+            if coef[j]>0.0001:    ##############################################  attentiion!!
+                nz_loc.append(j)
+                nz_cand_list.append(bit_cand_list[i][j])
+                #nz_sum_list.append(bitsum_list[i][j])
+        clf2=LinearRegression(fit_intercept=False,copy_X=True)
+        #clf2=Lasso(alpha=1.0)
+        #print(nz_cand_list,y)
+        x2=map(list,zip(*nz_cand_list))
+        n=clf2.fit(x2,y)
+        coef2=clf2.coef_
+        #print('coef2',coef2)
+        
+        for j in range(len(coef2)):
+            #print('loc',nz_loc[j],coef2[j])
+            cf[nz_loc[j]]=coef2[j]
+            
+    
         #print(coef)
         #index=coef.nonzero()
-        ratio=coef/(sum(coef))
+        ratio=cf/(sum(cf))
         lasso_cf.append(ratio.tolist())
         #print(clf.coef_)
          
@@ -82,7 +116,7 @@ def lasso_regression(bit_cand_list,bitsum_list):
         x=map(list, zip(*bit_cand_list[i]))
         y=bitsum_list[i]
         #clf=LinearRegression(fit_intercept=False,copy_X=True)
-        clf = Lasso(alpha=1.0)
+        clf = Lasso(alpha=0.5)
         #clf=BayesianRidge()
         #clf=ElasticNet(alpha=0.1, l1_ratio=2.0)
         m=clf.fit(x, y)
@@ -98,6 +132,8 @@ def Get_rid_sparse(file_id,readlimit,samplerate,bloombit,hashbit,f,sparse_rate,g
     
     att_num,node_num,true_node_num,rowlist,multilist=Get_Params.get_file_info(file_id,readlimit,samplerate)
     bit_cand_list,bit_list,bitsum_list=rappor_process(bloombit, hashbit, f,att_num,node_num,true_node_num,rowlist,multilist)
+    
+    print(rowlist)
             
     if get_rid_flag==True :  
         p_single=lasso_regression(bit_cand_list, bitsum_list)
@@ -119,6 +155,8 @@ def Get_rid_sparse(file_id,readlimit,samplerate,bloombit,hashbit,f,sparse_rate,g
         bit_cand_list3=bit_cand_list
         bit_list3=bit_list
         bitsum_list3=bitsum_list
+        
+    print(rowlist)
     return att_num,node_num,true_node_num,rowlist,multilist,bit_cand_list3,bit_list3,bitsum_list3
                       
 ########################################################################################################################################################################################    
