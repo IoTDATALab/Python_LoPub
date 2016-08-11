@@ -16,6 +16,8 @@ from sklearn.linear_model import Lasso, LinearRegression
 def rappor_prob(x_rappor=[],x_signal=[],f=0.0):
     x_rappor=numpy.array(x_rappor)
     x_signal=numpy.array(x_signal)
+    #print(x_rappor)
+    #print(x_signal)
     prob=1.0
     prob=numpy.prod(numpy.power((0.5*f),x_signal*x_rappor+(1-x_signal)*(1-x_rappor))*numpy.power((1.0-0.5*f),(1-x_signal)*x_rappor+x_signal*(1-x_rappor)))
     
@@ -31,6 +33,8 @@ def rappor_prob(x_rappor=[],x_signal=[],f=0.0):
 def joint_prob(i,j,p,f,x_rappor,x_signal,y_rappor,y_signal):
     prob=p[i][j]*rappor_prob(x_rappor, x_signal, f)*rappor_prob(y_rappor, y_signal, f)
     return prob
+
+#get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
 
 def get_bayes(x_rappor,y_rappor,x_signal_list,y_signal_list,p,f,i,j):
     
@@ -135,10 +139,6 @@ def em_lasso(att_cand,sum_cand_list):
          
     return em_lasso_cf
 
-    #print('ols',OLS.T)
-#     
-    
-#     return clf.coef_
 
 def estimate_2d2(att1signal_list,att2signal_list,bitsum_list,clique):
     att_cand=[list_product(att1signal_list, att2signal_list)]
@@ -159,16 +159,80 @@ def estimate_2d2(att1signal_list,att2signal_list,bitsum_list,clique):
             ptemp[i].append(protemp[(i)*leng2+j])
     return ptemp
 
+ 
+ 
+ 
+def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
+#def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,f,dt=0.001):
+#     print(att1signal_list)
+#     print(att2signal_list)
+#     print(att1data_rappor_list[1])
+#     print(att2data_rappor_list[1])
     
-def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,f,dt=0.001):
+    
+    m=len(att1signal_list)
+    n=len(att2signal_list)
+    N=len(att1data_rappor_list)
+    #print(m,n,N)
+    p_cond=numpy.array([[0.0 for i in range(N)] for j in range(m*n)])
+    #print(p_cond,p_cond.sum())
+    p=estimate_2d2(att1signal_list, att2signal_list, bitsum_list, clique)
+    #p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]  #initial value
+    p_result=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+    maxp=1.0 
+
+    for kk in range(N):  
+        for i in range(m):
+                for j in range(n):
+                    p_cond[i*(n)+j][kk]=rappor_prob(att1data_rappor_list[kk], att1signal_list[i], f)*rappor_prob(att2data_rappor_list[kk], att2signal_list[j], f)                      
+                #print (p_cond[i*(n)+j][kk])
+    #for kk in range(N):
+    #print('sum',p_cond.sum())
+    while(abs(p_result.max()-maxp)>0.00001):
+        maxp=p_result.max()
+        p_poster_temp=[[0.0 for i in range(n)] for j in range(m)]
+        for kk in range(N):
+             
+            fenmu=0.0
+            fenzi=0.0
+            
+            for i2 in range(m):
+                    for j2 in range(n):
+                        fenmu+=p[i2][j2]*p_cond[i2*(n)+j2][kk]
+                             
+                             
+            for i in range(m):
+                for j in range(n):
+                    fenzi=p[i][j]*p_cond[i*(n)+j][kk]
+                    p_poster_temp[i][j]+=fenzi/fenmu
+                     
+                     
+        for i in range(m):
+                for j in range(n):
+                    p[i][j]=p_poster_temp[i][j]/N
+  
+        sump=0.0
+        for i in range(m):
+            for j in range(n):
+                sump+=p[i][j]
+        for i in range(m):
+            for j in range(n):
+                p_result[i][j]=p[m-1-i][n-1-j]/sump    
+           
+        #if maxp<p_result.max():
+        #print('p_EM:',p_result)
+    return list(p_result) 
+ 
+ 
+   
+def estimate_2d1(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
     m=len(att1signal_list)
     n=len(att2signal_list)
     N=len(att1data_rappor_list)
     p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]
     p_result=[[0.0 for j in range(n)]for i in range(m)]
-
-
-    for i_time in range(50):
+  
+    for i_time in range(15):
         for i in range(m):
             for j in range(n):
                 fenzi=0.0
@@ -176,7 +240,7 @@ def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2si
                     #kk=randint(0,N-1)
                     fenzi+=get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
                 p[i][j]=fenzi*1.0/N
-
+  
         sump=0.0
         for i in range(m):
             for j in range(n):
@@ -185,8 +249,8 @@ def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2si
             for j in range(n):
                 p_result[i][j]=p[m-1-i][n-1-j]/sump        
         #print('deltap',deltap)    
-        
-        #print(i_time,'p_EM:',p_result)
+          
+        print(i_time,'p_EM:',p_result)
     return list(p_result)
 #######################################################################################################################################################################################################
 
@@ -207,16 +271,35 @@ def list_paste(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2sig
     
     return att3data_rappor_list,att3signal_list
 
+# def rappor_list_paste(*attdata_rappor_list):   ####################################  for arbitrary lists
+# 
+#     attcombine_rappor_list=[]
+#     for each_attdata_rappor_list in attdata_rappor_list:
+#         attcombine_rappor_list.extend(each_attdata_rappor_list)
+#         #temp_rappor_list=attcombine_rappor_list
+#     return attcombine_rappor_list
+
 def rappor_list_paste(*attdata_rappor_list):   ####################################  for arbitrary lists
     #print(attdata_rappor_list)
     #m=len(attdata_rappor_list[0])
+    #attdata_rappor_list=list(attdata_rappor_list)
     m=len(attdata_rappor_list)
     n=len(attdata_rappor_list[0])
-    temp_rappor_list=[[0 for i in range(n)]for i in range(m)]
-    for each_attdata_rappor_list in attdata_rappor_list:
-        attcombine_rappor_list=[x+y for x,y in zip(temp_rappor_list,each_attdata_rappor_list)]
+    #print(m,n)
+    temp_rappor_list=[[]for i in range(n)]
+    #temp_rappor_list=[[]]
+    #print(attdata_rappor_list)
+    for i in range(m):
+        #print(temp_rappor_list)
+       # print(attdata_rappor_list[i])
+        attcombine_rappor_list=[x+y for x,y in zip(temp_rappor_list,attdata_rappor_list[i])]
         temp_rappor_list=attcombine_rappor_list
+   # attcombine_rappor_list=map(list, zip(*attcombine_rappor_list))
     return attcombine_rappor_list
+
+# a=[[1,0],[1,0],[1,1]]
+# b=[[1,1],[1,0],[1,1]]
+# print(rappor_list_paste(a,b))
 
 def list_product(att1signal_list,att2signal_list):
     product_list=[]
@@ -285,7 +368,7 @@ def att_combin(bit_list,bit_cand_list,row_list,loc_list):
         att_rappor_list_combine=rappor_list_paste(*rappor_para_string)
         att_signal_list_combine=signal_list_paste(*signal_para_string)
         att_row_list_combine=row_list_paste(*row_string)
-        #att_row_list_combine=list(row_string)
+
     return att_rappor_list_combine,att_signal_list_combine,att_row_list_combine
 
 def simple_combin(bit_list,row_list,loc_list):
