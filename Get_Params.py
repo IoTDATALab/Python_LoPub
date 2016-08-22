@@ -4,6 +4,7 @@ import copy
 import random
 import csv
 import os
+import pickle
 #import pandas
 #import numpy
 
@@ -19,105 +20,118 @@ def get_file_info(input_id, readlimit,samplerate):
     ##Params:
     ##input_id: Specify the input file number
     ##read_limit: Specify the number of rows reading
-    
-    input_id=str(input_id)
-    input_data='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.dat'
-    input_domain='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.domain'
-##############################################################################################
-#Get the attributes number and nodes number
-    fd=open(input_domain,'r')
-    head_line=fd.readline()
-    readrow=head_line.split(" ")
-    #print(readrow)
-    att_num=int(readrow[0])
-    node_num=int(readrow[1])
-    if (node_num>=readlimit):
-        node_num=readlimit
-    ##print(att_num,node_num)
-    
-    ##########################################################################################
-    #Get the attributes info in the domain file
-    rowlist = [[] for row in range(att_num)]
-    newlist=[[] for row in range(att_num)]
-    
-    i=0
-    while 1:
-        line = fd.readline()
-        if not line:
-            break
-        pass # do something
+    os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+    input_str=str(input_id)+str(samplerate)
+    isExistsPickle=os.path.isfile(input_str+'origindata.pickle')
+    print(isExistsPickle)
+    if isExistsPickle:
         
-        if i>=readlimit:
-            break
-        pass
+        with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'origindata.pickle', 'r') as memoryfile:
+            att_num,node_num,true_node_num,rowlist,multilist= pickle.load(memoryfile)    
+    else:
+        
+        print('need to read data.')
     
-        line=line.strip("\n")
-        readrow=line.split(" ")
+        input_id=str(input_id)
+        input_data='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.dat'
+        input_domain='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.domain'
+    ##############################################################################################
+    #Get the attributes number and nodes number
+        fd=open(input_domain,'r')
+        head_line=fd.readline()
+        readrow=head_line.split(" ")
         #print(readrow)
-        start_x=0
-        each_code=0  #transfer non-number data into numbers
-        for eachit in readrow:
-            start_x=start_x+1
-            eachit.rstrip()
-            if start_x>3:
-                neweach=eachit
-                
-                #print(neweach)
-                newlist[i].append(neweach)
-                #rowlist[i].append(eachit)
-                rowlist[i].append(str(each_code))#transfer non-number data into numbers
-                each_code=each_code+1#transfer non-number data into numbers
-            #print(eachit)
-        i=i+1
-    fd.close()
-    #print(rowlist)
-    #print(newlist)
-    #newlist.remove([])
-    #rowlist.remove([])
-    
-    ############################################################################
-    #Get the data in the .dat file
-    multilist = [[] for row in range(node_num)]
-    fp=open(input_data,"r")
-    fp.readline();  ###just for skip the header line
-    i=0
-    entry={}
-    while 1:
-        line = fp.readline()
-        if not line:
-            break
-        pass # do something
+        att_num=int(readrow[0])
+        node_num=int(readrow[1])
+        if (node_num>=readlimit):
+            node_num=readlimit
+        ##print(att_num,node_num)
         
-        if i>=readlimit:
-            break
-        pass
-    
-        line=line.strip("\n")
-        temp=line.split(",")
-        #print(node_num,i, 'after split:', temp)
-        entry[i]=temp
-        iii=0#transfer non-number data into numbers
-        for eachit in temp:
-            each_index=newlist[iii].index(eachit)#transfer non-number data into numbers
-            iii=iii+1#transfer non-number data into numbers
-            multilist[i].append(str(each_index))#transfer non-number data into numbers
-            #multilist[i].append(eachit)
-        i=i+1
-    fp.close()
-    #print(multilist)
-    random.seed(10)
-    samplesize=int(node_num*samplerate)
-    multilist=random.sample(multilist,samplesize)
-    true_node_num=node_num
-    node_num=samplesize
-    
-#     node_limit=3
-#     rowlist=rowlist[0:node_limit]
-#     multilist=map(list,zip(*multilist))
-#     multilist=multilist[0:node_limit]
-#     multilist=map(list,zip(*multilist))
-#     att_num=node_limit
-    
+        ##########################################################################################
+        #Get the attributes info in the domain file
+        rowlist = [[] for row in range(att_num)]
+        newlist=[[] for row in range(att_num)]
+        
+        i=0
+        while 1:
+            line = fd.readline()
+            if not line:
+                break
+            pass # do something
+            
+            if i>=readlimit:
+                break
+            pass
+        
+            line=line.strip("\n")
+            readrow=line.split(" ")
+            #print(readrow)
+            start_x=0
+            each_code=0  #transfer non-number data into numbers
+            for eachit in readrow:
+                start_x=start_x+1
+                eachit.rstrip()
+                if start_x>3:
+                    neweach=eachit
+                    
+                    #print(neweach)
+                    newlist[i].append(neweach)
+                    #rowlist[i].append(eachit)
+                    rowlist[i].append(str(each_code))#transfer non-number data into numbers
+                    each_code=each_code+1#transfer non-number data into numbers
+                #print(eachit)
+            i=i+1
+        fd.close()
+        #print(rowlist)
+        #print(newlist)
+        #newlist.remove([])
+        #rowlist.remove([])
+        
+        ############################################################################
+        #Get the data in the .dat file
+        multilist = [[] for row in range(node_num)]
+        fp=open(input_data,"r")
+        fp.readline();  ###just for skip the header line
+        i=0
+        entry={}
+        while 1:
+            line = fp.readline()
+            if not line:
+                break
+            pass # do something
+            
+            if i>=readlimit:
+                break
+            pass
+        
+            line=line.strip("\n")
+            temp=line.split(",")
+            #print(node_num,i, 'after split:', temp)
+            entry[i]=temp
+            iii=0#transfer non-number data into numbers
+            for eachit in temp:
+                each_index=newlist[iii].index(eachit)#transfer non-number data into numbers
+                iii=iii+1#transfer non-number data into numbers
+                multilist[i].append(str(each_index))#transfer non-number data into numbers
+                #multilist[i].append(eachit)
+            i=i+1
+        fp.close()
+        #print(multilist)
+        random.seed(10)
+        samplesize=int(node_num*samplerate)
+        multilist=random.sample(multilist,samplesize)
+        true_node_num=node_num
+        node_num=samplesize
+        
+    #     node_limit=3
+    #     rowlist=rowlist[0:node_limit]
+    #     multilist=map(list,zip(*multilist))
+    #     multilist=multilist[0:node_limit]
+    #     multilist=map(list,zip(*multilist))
+    #     att_num=node_limit
+        with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'origindata.pickle', 'w') as memoryfile:
+            pickle.dump([att_num,node_num,true_node_num,rowlist,multilist], memoryfile)
+
     
     return att_num,node_num,true_node_num,rowlist,multilist
 
@@ -125,40 +139,55 @@ def get_file_info(input_id, readlimit,samplerate):
 
 ###############################################################################################################################################
 def get_static_info(att_num,node_num,rowlist,multilist):
-    newlist= [[]for i in range(att_num)]
-    freqrow1=[[]for i in range(att_num)]
-    freqnum1=[[]for i in range(att_num)]
-    freqrate1=[[] for i in range(att_num)]
-    freqrow2=[[] for row in range(att_num*(att_num-1)/2)] 
-    freqnum2=[[] for row in range(att_num*(att_num-1)/2)] 
-    freqrate2=[[] for row in range(att_num*(att_num-1)/2)] 
     
-    ii=0
-    
-    for coli in range(att_num):
-        for rowi in range(node_num):
-            newlist[coli].append(multilist[rowi][coli]) # may be useful for sum!
-        freqrow1[coli]=Counter(newlist[coli])
-        for eachitem in rowlist[coli]:
-            freqnum1[coli].append(freqrow1[coli][eachitem])
-        for i1 in range(len(freqnum1[coli])):
-            freqrate1[coli].append(1.0*freqnum1[coli][i1]/node_num)       
-    
-        for colj in range(coli+1, att_num):
-            possible_combine=[]
-            for eachi in rowlist[coli]:
-                for eachj in rowlist[colj]:
-                    possible_combine.append(str(eachi)+'|'+str(eachj))
-            rowwriterr=[]
+    os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+    input_str=str(att_num)+str(node_num)
+    isExistsPickle=os.path.isfile(input_str+'originstatic.pickle')
+    print(isExistsPickle)
+    if isExistsPickle:
+        
+        with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'originstatic.pickle', 'r') as memoryfile:
+            freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist= pickle.load(memoryfile)    
+    else:
+        
+        print('need to compute static info from data.')
+        newlist= [[]for i in range(att_num)]
+        freqrow1=[[]for i in range(att_num)]
+        freqnum1=[[]for i in range(att_num)]
+        freqrate1=[[] for i in range(att_num)]
+        freqrow2=[[] for row in range(att_num*(att_num-1)/2)] 
+        freqnum2=[[] for row in range(att_num*(att_num-1)/2)] 
+        freqrate2=[[] for row in range(att_num*(att_num-1)/2)] 
+        
+        ii=0
+        
+        for coli in range(att_num):
             for rowi in range(node_num):
-                strtemp=str(multilist[rowi][coli])+'|'+str(multilist[rowi][colj])
-                rowwriterr.append(strtemp)
-            freqrow2[ii]=Counter(rowwriterr)
-            for eachitem in possible_combine:
-                freqnum2[ii].append(freqrow2[ii][eachitem])
-            for i2 in range(len(freqnum2[ii])):
-                freqrate2[ii].append(1.0*freqnum2[ii][i2]/node_num)
-            ii=ii+1
+                newlist[coli].append(multilist[rowi][coli]) # may be useful for sum!
+            freqrow1[coli]=Counter(newlist[coli])
+            for eachitem in rowlist[coli]:
+                freqnum1[coli].append(freqrow1[coli][eachitem])
+            for i1 in range(len(freqnum1[coli])):
+                freqrate1[coli].append(1.0*freqnum1[coli][i1]/node_num)       
+        
+            for colj in range(coli+1, att_num):
+                possible_combine=[]
+                for eachi in rowlist[coli]:
+                    for eachj in rowlist[colj]:
+                        possible_combine.append(str(eachi)+'|'+str(eachj))
+                rowwriterr=[]
+                for rowi in range(node_num):
+                    strtemp=str(multilist[rowi][coli])+'|'+str(multilist[rowi][colj])
+                    rowwriterr.append(strtemp)
+                freqrow2[ii]=Counter(rowwriterr)
+                for eachitem in possible_combine:
+                    freqnum2[ii].append(freqrow2[ii][eachitem])
+                for i2 in range(len(freqnum2[ii])):
+                    freqrate2[ii].append(1.0*freqnum2[ii][i2]/node_num)
+                ii=ii+1
+        
+        with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'originstatic.pickle', 'w') as memoryfile:
+            pickle.dump([freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist], memoryfile)
                
     return freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist
 
