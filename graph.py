@@ -235,13 +235,14 @@ def graph_to_jtree(model_graph, ns):
     using triangulation.
     """
     [triangulated_graph, cliques] = triangulate(model_graph.copy(), elim_order)
+    #print(triangulated_graph)
 
     """
     Obtain a junction tree from the set of cliques.
     """
     [jtree, root, B, w] = cliques_to_jtree(cliques, ns)
 
-    return [jtree, root, cliques, B, w]
+    return [triangulated_graph,jtree, root, cliques, B, w]
 
 def best_first_elim_order(G, node_sizes, stage=[]):
     """

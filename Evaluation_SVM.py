@@ -65,11 +65,14 @@ def Data_construct(data_list,column_num,ratio):
     return train_x,train_y,test_x,test_y,single_error
 
 def SVM_evaluation(train_x,train_y,test_x,test_y):    
-    clf=svm.SVC()
-    clf.fit(train_x,train_y)
+    if len(set(train_y))<2:
+        svm_y=[train_y[0] for i in range (len(test_x))]
+    else:
+        clf=svm.SVC()
+        clf.fit(train_x,train_y)
     
-    svm_y=clf.predict(test_x)
-    svm_y=svm_y.tolist()
+        svm_y=clf.predict(test_x)
+        svm_y=svm_y.tolist()
     
     right_num=0.0
     for i in range(len(test_y)):
