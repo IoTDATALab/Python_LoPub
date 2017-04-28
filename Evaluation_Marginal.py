@@ -9,7 +9,7 @@ from JunctionTree import independent_marginal2,independent_marginal
 from Estimate_Joint_Distribution import true_joint_distribution, unfold_pro_list
 from numpy import power
 
-file_id=2
+file_id=4
 fai_C=0.2    #from 0.2, 0.3, 0.4, 0.5
 f=0.5   # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
 bloombit=32

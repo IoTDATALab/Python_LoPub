@@ -2,7 +2,6 @@ import Get_Rappor
 import Get_Params
 import numpy
 import copy
-#import lasso
 from copy import copy, deepcopy
 from itertools import product,combinations
 from random import randint
@@ -16,8 +15,10 @@ from sklearn.linear_model import Lasso, LinearRegression
 def rappor_prob(x_rappor=[],x_signal=[],f=0.0):
     x_rappor=numpy.array(x_rappor)
     x_signal=numpy.array(x_signal)
+    #print(x_rappor)
+    #print(x_signal)
     prob=1.0
-    prob=numpy.prod(numpy.power((0.5*f),x_signal*x_rappor+(1-x_signal)*(1-x_rappor))*numpy.power((1.0-0.5*f),(1-x_signal)*x_rappor+x_signal*(1-x_rappor)))
+    prob=numpy.prod(numpy.power(1-(0.5*f),x_signal*x_rappor+(1-x_signal)*(1-x_rappor))*numpy.power((0.5*f),(1-x_signal)*x_rappor+x_signal*(1-x_rappor)))
     
 #     for i in range(len(x_signal)) :
 #         B=x_signal[i]
@@ -31,6 +32,8 @@ def rappor_prob(x_rappor=[],x_signal=[],f=0.0):
 def joint_prob(i,j,p,f,x_rappor,x_signal,y_rappor,y_signal):
     prob=p[i][j]*rappor_prob(x_rappor, x_signal, f)*rappor_prob(y_rappor, y_signal, f)
     return prob
+
+#get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
 
 def get_bayes(x_rappor,y_rappor,x_signal_list,y_signal_list,p,f,i,j):
     
@@ -135,10 +138,6 @@ def em_lasso(att_cand,sum_cand_list):
          
     return em_lasso_cf
 
-    #print('ols',OLS.T)
-#     
-    
-#     return clf.coef_
 
 def estimate_2d2(att1signal_list,att2signal_list,bitsum_list,clique):
     att_cand=[list_product(att1signal_list, att2signal_list)]
@@ -159,53 +158,292 @@ def estimate_2d2(att1signal_list,att2signal_list,bitsum_list,clique):
             ptemp[i].append(protemp[(i)*leng2+j])
     return ptemp
 
+ 
+ 
+ 
+def estimate_2d1(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
+#def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,f,dt=0.001):
+#     print(att1signal_list)
+#     print(att2signal_list)
+#     print(att1data_rappor_list[1])
+#     print(att2data_rappor_list[1])
     
-def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,f,dt=0.001):
+    
     m=len(att1signal_list)
     n=len(att2signal_list)
     N=len(att1data_rappor_list)
-    p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]
-    p_result=[[0.0 for j in range(n)]for i in range(m)]
-    #print(att2signal_list)
-    #print(att1signal_list,att2signal_list)
-    #temp=[[0.0 for i in range(n)]for j in range(m)]
-    #deltap=deepcopy(p)
-    for i_time in range(50):
-        #temp=deepcopy(p)
-        #print('temp',temp)
-        
-        #maxp=numpy.max(deltap)
-        #print('maxp',maxp)
-        #if maxp<(dt/(m*n)):
-            #break
-        #pass        
-        #deltap=deepcopy(p)
+    #print(m,n,N)
+    p_cond=numpy.array([[0.0 for i in range(N)] for j in range(m*n)])
+    #print(p_cond,p_cond.sum())
+    p=estimate_2d2(att1signal_list, att2signal_list, bitsum_list, clique)
+    #p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]  #initial value
+    p_result=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+    maxp=1.0 
+    tt=0
+
+    for kk in range(N):  
+        for i in range(m):
+                for j in range(n):
+                    p_cond[i*(n)+j][kk]=rappor_prob(att1data_rappor_list[kk], att1signal_list[i], f)*rappor_prob(att2data_rappor_list[kk], att2signal_list[j], f)                      
+                #print (p_cond[i*(n)+j][kk])
+    #for kk in range(N):
+    #print('sum',p_cond.sum())
+    
+    while(abs(p_result.max()-maxp)>0.001):
+    #while(tt<=10):
+        print(tt)
+        tt+=1
+        maxp=p_result.max()
+        p_poster_temp=[[0.0 for i in range(n)] for j in range(m)]
+        for kk in range(N):
+             
+            fenmu=0.0
+            fenzi=0.0
+            
+            for i2 in range(m):
+                for j2 in range(n):
+                    fenmu+=p[i2][j2]*p_cond[i2*(n)+j2][kk]
+                             
+                             
+            for i in range(m):
+                for j in range(n):
+                    fenzi=p[i][j]*p_cond[i*(n)+j][kk]
+                    p_poster_temp[i][j]+=fenzi/fenmu
+                     
+                     
         for i in range(m):
             for j in range(n):
-                fenzi=0.0
-                for kk in range(N):
-                    #kk=randint(0,N-1)
-                    fenzi+=get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
-                p[i][j]=fenzi*1.0/N
-                #p[i][j]=fenzi*1.0/N
-            #print('Estimate:',i,'of',m)
-                #deltap[i][j]=deepcopy(abs(p[i][j]-temp[i][j]))
-        #print(i_time,'p:',p)
+                p[i][j]=p_poster_temp[i][j]/N
+  
+#         sump=0.0
+#         for i in range(m):
+#             for j in range(n):
+#                 sump+=p[i][j]
+#         for i in range(m):
+#             for j in range(n):
+#                 p_result[i][j]=p[m-1-i][n-1-j]/sump    
+           
+        #if maxp<p_result.max():
+        #print('p_EM:',p_result)
+    return list(p_result) 
+ 
+ 
+   
+def estimate_2dnew(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
+    m=len(att1signal_list)
+    n=len(att2signal_list)
+    N=len(att1data_rappor_list)
+    p_cond=numpy.array([[0.0 for j in range(N)] for i in range(m*n)])
+    #p_cond=numpy.array([[0.0 for j in range(m*n)] for i in range(N)])
+    p=[[(1.0/(m*n)) for j in range(n)]for i in range(m)]
+    #p_result=[[0.0 for j in range(n)]for i in range(m)]
+    p_result=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+
+    maxp=1.0 
+    tt=0
+
+    for kk in range(N):  
+        for i in range(m):
+            for j in range(n):
+                    #print(att1signal_list)
+                    #print(att2signal_list)
+                p_cond[i*(n)+j][kk]=rappor_prob(att1data_rappor_list[kk], att1signal_list[i], f)*rappor_prob(att2data_rappor_list[kk], att2signal_list[j], f)                      
+                #print (p_cond[i*(n)+j][kk])
+    #for kk in range(N):
+    #print('sum',p_cond.sum())
+    #print('conditon',p_cond)
+    #while(abs(p_result.max()-maxp)>0.001):
+    while(tt<=15):
+        #print(tt)
+        tt+=1
+        maxp=p_result.max()
+        p_poster_temp=[[0.0 for j in range(n)] for i in range(m)]
+        for kk in range(N):
+             
+            fenmu=0.0
+            fenzi=0.0
+            
+            for i2 in range(m):
+                for j2 in range(n):
+                    fenmu+=p[i2][j2]*p_cond[i2*(n)+j2][kk]
+                             
+                             
+            for i in range(m):
+                for j in range(n):
+                    fenzi=p[i][j]*p_cond[i*(n)+j][kk]
+                    p_poster_temp[i][j]=p_poster_temp[i][j]+fenzi/fenmu
+        
+                     
+                     
+        for i in range(m):
+            for j in range(n):
+                p[i][j]=p_poster_temp[i][j]/N
+        
+        #print('p',p)
         sump=0.0
         for i in range(m):
             for j in range(n):
-                sump+=p[i][j]
+                sump=sump+p[i][j]
         for i in range(m):
             for j in range(n):
-                p_result[i][j]=p[m-1-i][n-1-j]/sump        
-        #print('deltap',deltap)    
-        
-        #print(i_time,'p_EM:',p_result)
-    return list(p_result)
+                p_result[i][j]=p[m-1-i][n-1-j]/sump    
+        #print('p_restult',p_result.tolist())  
+        #if maxp<p_result.max():
+    #print('p_EM:',p_result)
+    return list(p_result) 
+  
+#     for i_time in range(15):
+#         for i in range(m):
+#             for j in range(n):
+#                 fenzi=0.0
+#                 for kk in range(N):
+#                     #kk=randint(0,N-1)
+#                     fenzi+=get_bayes(att1data_rappor_list[kk], att2data_rappor_list[kk], att1signal_list, att2signal_list, p, f, i, j)
+#                 p[i][j]=fenzi*1.0/N
+#   
+#         sump=0.0
+#         for i in range(m):
+#             for j in range(n):
+#                 sump+=p[i][j]
+#         for i in range(m):
+#             for j in range(n):
+#                 p_result[i][j]=p[m-1-i][n-1-j]/sump        
+#         #print('deltap',deltap)    
+#           
+#         print(i_time,'p_EM:',p_result)
+#     return list(p_result)
 #######################################################################################################################################################################################################
+def estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
+    m=len(att1signal_list)
+    n=len(att2signal_list)
+    #print('cand1',att1signal_list)
+    #print('cand2',att2signal_list)
+    N=len(att1data_rappor_list)
+    #p_cond=numpy.array([[0.0 for j in range(N)] for i in range(m*n)])
+    p_cond=numpy.array([[[0.0 for j in range(N)] for i in range(n)] for k in range(m)])
+    #p_cond=numpy.array([[0.0 for j in range(m*n)] for i in range(N)])
+    p=numpy.array([[(1.0/(m*n)) for j in range(n)]for i in range(m)])
+    #p=estimate_2d2(att1signal_list, att2signal_list, bitsum_list, clique)
+    #p_result=[[0.0 for j in range(n)]for i in range(m)]
+    p_result=numpy.array([[0.0 for j in range(n)]for i in range(m)])
 
+    maxp=1.0 
+    tt=0
 
+    for kk in range(N):  
+        for i in range(m):
+            for j in range(n):
+                    #print(att1signal_list)
+                    #print(att2signal_list)
+                if (p[i][j]>0.0):
+                    p_cond[i][j][kk]=rappor_prob(att1data_rappor_list[kk], att1signal_list[i], f)*rappor_prob(att2data_rappor_list[kk], att2signal_list[j], f)                      
+                #print (p_cond[i*(n)+j][kk])
+    while(abs(p_result.max()-maxp)>0.001):
+    #while(tt<=2):
+        #print(tt,)
+        tt+=1
+        maxp=p_result.max()
+        p_poster_temp=numpy.array([[0.0 for j in range(n)] for i in range(m)])
+        for kk in range(N):
+             
+            fenmu=0.0
+            fenzi=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+            
+            for i2 in range(m):
+                for j2 in range(n):
+                    fenmu+=p[i2][j2]*p_cond[i2][j2][kk]
+                             
+                             
+            for i in range(m):
+                for j in range(n):
+                    fenzi[i][j]=p[i][j]*p_cond[i][j][kk]
+            
+            for i in range(m):
+                for j in range(n):
+                    p_poster_temp[i][j]+=fenzi[i][j]/fenmu            
+                     
+        for i in range(m):
+            for j in range(n):
+                p[i][j]=p_poster_temp[i][j]/N
+        
+        #print('p',p)
+        sump=0.0
+        for i in range(m):
+            for j in range(n):
+                sump=sump+p[i][j]
+        for i in range(m):
+            for j in range(n):
+                p_result[i][j]=p[i][j]/sump    
+        #print('p_restult',p_result.tolist())  
+        #if maxp<p_result.max():
+    #print('p_EM:',p_result)
+    return list(p_result) 
 
+def estimate_2d6(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001):
+    m=len(att1signal_list)
+    n=len(att2signal_list)
+    #print('cand1',att1signal_list)
+    #print('cand2',att2signal_list)
+    N=len(att1data_rappor_list)
+    #p_cond=numpy.array([[0.0 for j in range(N)] for i in range(m*n)])
+    p_cond=numpy.array([[[0.0 for j in range(N)] for i in range(n)] for k in range(m)])
+    #p_cond=numpy.array([[0.0 for j in range(m*n)] for i in range(N)])
+    #p=numpy.array([[(1.0/(m*n)) for j in range(n)]for i in range(m)])
+    p=estimate_2d2(att1signal_list, att2signal_list, bitsum_list, clique)
+    #p_result=[[0.0 for j in range(n)]for i in range(m)]
+    p_result=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+
+    maxp=1.0 
+    tt=0
+
+    for kk in range(N):  
+        for i in range(m):
+            for j in range(n):
+                    #print(att1signal_list)
+                    #print(att2signal_list)
+                if (p[i][j]>0.0):
+                    p_cond[i][j][kk]=rappor_prob(att1data_rappor_list[kk], att1signal_list[i], f)*rappor_prob(att2data_rappor_list[kk], att2signal_list[j], f)                      
+                #print (p_cond[i*(n)+j][kk])
+    while(abs(p_result.max()-maxp)>0.001):
+    #while(tt<=2):
+        #print(tt,)
+        tt+=1
+        maxp=p_result.max()
+        p_poster_temp=numpy.array([[0.0 for j in range(n)] for i in range(m)])
+        for kk in range(N):
+             
+            fenmu=0.0
+            fenzi=numpy.array([[0.0 for j in range(n)]for i in range(m)])
+            
+            for i2 in range(m):
+                for j2 in range(n):
+                    fenmu+=p[i2][j2]*p_cond[i2][j2][kk]
+                             
+                             
+            for i in range(m):
+                for j in range(n):
+                    fenzi[i][j]=p[i][j]*p_cond[i][j][kk]
+            
+            for i in range(m):
+                for j in range(n):
+                    p_poster_temp[i][j]+=fenzi[i][j]/fenmu            
+                     
+        for i in range(m):
+            for j in range(n):
+                p[i][j]=p_poster_temp[i][j]/N
+        
+        #print('p',p)
+        sump=0.0
+        for i in range(m):
+            for j in range(n):
+                sump=sump+p[i][j]
+        for i in range(m):
+            for j in range(n):
+                p_result[i][j]=p[i][j]/sump    
+        #print('p_restult',p_result.tolist())  
+        #if maxp<p_result.max():
+    #print('p_EM:',p_result)
+    return list(p_result)
 
 
 ###################################################################################################################################################################################################33#
@@ -221,16 +459,35 @@ def list_paste(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2sig
     
     return att3data_rappor_list,att3signal_list
 
+# def rappor_list_paste(*attdata_rappor_list):   ####################################  for arbitrary lists
+# 
+#     attcombine_rappor_list=[]
+#     for each_attdata_rappor_list in attdata_rappor_list:
+#         attcombine_rappor_list.extend(each_attdata_rappor_list)
+#         #temp_rappor_list=attcombine_rappor_list
+#     return attcombine_rappor_list
+
 def rappor_list_paste(*attdata_rappor_list):   ####################################  for arbitrary lists
     #print(attdata_rappor_list)
     #m=len(attdata_rappor_list[0])
+    #attdata_rappor_list=list(attdata_rappor_list)
     m=len(attdata_rappor_list)
     n=len(attdata_rappor_list[0])
-    temp_rappor_list=[[0 for i in range(n)]for i in range(m)]
-    for each_attdata_rappor_list in attdata_rappor_list:
-        attcombine_rappor_list=[x+y for x,y in zip(temp_rappor_list,each_attdata_rappor_list)]
+    #print(m,n)
+    temp_rappor_list=[[]for i in range(n)]
+    #temp_rappor_list=[[]]
+    #print(attdata_rappor_list)
+    for i in range(m):
+        #print(temp_rappor_list)
+       # print(attdata_rappor_list[i])
+        attcombine_rappor_list=[x+y for x,y in zip(temp_rappor_list,attdata_rappor_list[i])]
         temp_rappor_list=attcombine_rappor_list
+   # attcombine_rappor_list=map(list, zip(*attcombine_rappor_list))
     return attcombine_rappor_list
+
+# a=[[1,0],[1,0],[1,1]]
+# b=[[1,1],[1,0],[1,1]]
+# print(rappor_list_paste(a,b))
 
 def list_product(att1signal_list,att2signal_list):
     product_list=[]
@@ -299,7 +556,7 @@ def att_combin(bit_list,bit_cand_list,row_list,loc_list):
         att_rappor_list_combine=rappor_list_paste(*rappor_para_string)
         att_signal_list_combine=signal_list_paste(*signal_para_string)
         att_row_list_combine=row_list_paste(*row_string)
-        #att_row_list_combine=list(row_string)
+
     return att_rappor_list_combine,att_signal_list_combine,att_row_list_combine
 
 def simple_combin(bit_list,row_list,loc_list):
@@ -320,6 +577,7 @@ def simple_combin(bit_list,row_list,loc_list):
 
 def true_joint_distribution(multilist,rowlist,loclist):
     list1,list2=simple_combin(multilist, rowlist, loclist)
+    #print('list2:',list2)
     freq_cat=Counter(list1)
     #print(freq_cat)
     freqnum=[]
@@ -332,8 +590,10 @@ def true_joint_distribution(multilist,rowlist,loclist):
         else:
             ff=1.0*freqnum[i]/sum(freqnum)
         freqrate.append(ff)
+    #print(list)
         
     return list2,freqrate
+
 
 def unfold_pro_list(pro):
     list(pro)
@@ -352,24 +612,24 @@ def unfold_pro_list(pro):
 
 
 
-# file_id=4
+#file_id=4
 # fai_C=0.2    #from 0.2, 0.3, 0.4, 0.5
-# f=0.5   # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
-# bloombit=32
-# hashbit=2
+#f=0.5   # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
+#bloombit=32
+#hashbit=2
 # dt=0.01
-# readlimit=50000
-# samplerate=0.001
+#readlimit=50000
+#samplerate=0.001
 #  
-# att_num1,node_num1,true_node_num1,rowlist1,multilist1=Get_Params.get_file_info(file_id,readlimit,1.0)
-# #att_num,node_num,true_node_num,rowlist,multilist=Get_Params.get_file_info(file_id,readlimit,samplerate)
-# bit_cand_list,bit_list,bitsum_list=Get_Rappor.rappor_process(bloombit, hashbit, f,att_num1,node_num1,true_node_num1,rowlist1,multilist1)
+#att_num1,node_num1,true_node_num1,rowlist1,multilist1=Get_Params.get_file_info(file_id,readlimit,1.0)
+#att_num,node_num,true_node_num,rowlist,multilist=Get_Params.get_file_info(file_id,readlimit,samplerate)
+#bit_cand_list,bit_list,bitsum_list=Get_Rappor.rappor_process(bloombit, hashbit, f,att_num1,node_num1,true_node_num1,rowlist1,multilist1)
 # print(bit_cand_list)
 # print(bitsum_list)
 # p_single=Get_Rappor.lasso_regression(bit_cand_list, bitsum_list)
 # print(p_single)
 # 
-# pro=estimate_2d2(bit_cand_list[0], bit_cand_list[1], bitsum_list, [0,1])
+#pro=estimate_2d(att1data_rappor_list,att2data_rappor_list,att1signal_list,att2signal_list,bitsum_list,clique,f,dt=0.001)
 # print(pro)
 # testlist=[[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]]
 # testsum=[[121.0, 79.0, -89.0, -7.0, -91.0, 2927.0, -75.0, 33.0, -5.0, 51.0, 141.0, -57.0, 73.0, 49.0, 159.0, 151.0, 193.0, -237.0, 105.0, 21633.0, 203.0, 93.0, -25.0, 133.0, -17.0, 18413.0, 41.0, -93.0, -311.0, -151.0, 369.0, 17.0, -133.0, 153.0, 111.0, 35.0, -217.0, 4443.0, 195.0, 297.0, -303.0, -33.0, -1.0, 139.0, -115.0, -93.0, -103.0, -83.0, 87.0, 131.0, -153.0, 21809.0, -127.0, -9.0, 123.0, 41.0, -65.0, 16961.0, 33.0, 137.0, 163.0, 139.0, -41.0, 131.0]]

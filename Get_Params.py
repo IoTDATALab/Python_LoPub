@@ -4,6 +4,7 @@ import copy
 import random
 import csv
 import os
+import pickle
 #import pandas
 #import numpy
 
@@ -19,7 +20,18 @@ def get_file_info(input_id, readlimit,samplerate):
     ##Params:
     ##input_id: Specify the input file number
     ##read_limit: Specify the number of rows reading
-    
+#     os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+#     input_str=str(input_id)+str(samplerate)
+#     isExistsPickle=os.path.isfile(input_str+'origindata.pickle')
+#     print(isExistsPickle)
+#     if isExistsPickle:
+#         print('read original data from pickle')
+#         with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'origindata.pickle', 'r') as memoryfile:
+#             att_num,node_num,true_node_num,rowlist,multilist= pickle.load(memoryfile)    
+#     else:
+        
+    print('Reading original data.')
+
     input_id=str(input_id)
     input_data='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.dat'
     input_domain='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.domain'
@@ -61,8 +73,6 @@ def get_file_info(input_id, readlimit,samplerate):
             eachit.rstrip()
             if start_x>3:
                 neweach=eachit
-                
-                #print(neweach)
                 newlist[i].append(neweach)
                 #rowlist[i].append(eachit)
                 rowlist[i].append(str(each_code))#transfer non-number data into numbers
@@ -70,7 +80,21 @@ def get_file_info(input_id, readlimit,samplerate):
             #print(eachit)
         i=i+1
     fd.close()
+    
+    
+#################################################################################################################        
+    '''
+    rowlist_compact=[]
+    print('Compressing data domain')
+    for each_row in rowlist:
+        if len(each_row)>7:
+            each_row=['0','1','2','3','4','5','6','7']
+            #each_row=['0','1','2']
+        rowlist_compact.append(each_row)      
+    rowlist=rowlist_compact
     #print(rowlist)
+    '''
+#################################################################################################################
     #print(newlist)
     #newlist.remove([])
     #rowlist.remove([])
@@ -104,27 +128,70 @@ def get_file_info(input_id, readlimit,samplerate):
             #multilist[i].append(eachit)
         i=i+1
     fp.close()
-    #print(multilist)
     
+    #######################################################################################################
+    '''
+    multilist_compact=[[] for row in range(node_num)]
+    print('Compressing original data')
+    for i in range(node_num):
+        row_data=multilist[i]
+        iii=0
+        for each_data in row_data:
+            each_index=rowlist_compact[iii].index(str(int(each_data)%len(rowlist_compact[iii])))
+            iii=iii+1
+            multilist_compact[i].append(str(each_index))
+            
+    multilist=multilist_compact
+    #print(multilist)
+    '''
+    #######################################################################################################
+    
+    #######################################################################################################
+    
+    
+    
+    #print(multilist)
+    random.seed(10)
     samplesize=int(node_num*samplerate)
     multilist=random.sample(multilist,samplesize)
     true_node_num=node_num
     node_num=samplesize
-    
+
+
+###############################################################################################################
+
+
+###############################################################################################################        
 #     node_limit=3
 #     rowlist=rowlist[0:node_limit]
 #     multilist=map(list,zip(*multilist))
 #     multilist=multilist[0:node_limit]
 #     multilist=map(list,zip(*multilist))
 #     att_num=node_limit
+    #with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'origindata.pickle', 'w') as memoryfile:
+    #    pickle.dump([att_num,node_num,true_node_num,rowlist,multilist], memoryfile)
     
+
     
     return att_num,node_num,true_node_num,rowlist,multilist
-
+##############################################################################################################################################
+#get_file_info(3, 60000,0.2)
 
 
 ###############################################################################################################################################
 def get_static_info(att_num,node_num,rowlist,multilist):
+    
+#     os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+#     input_str=str(att_num)+str(node_num)
+#     isExistsPickle=os.path.isfile(input_str+'originstatic.pickle')
+#     print(isExistsPickle)
+#     if isExistsPickle:
+#         print('read statistic from pickle')
+#         with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'originstatic.pickle', 'r') as memoryfile:
+#             freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist= pickle.load(memoryfile)    
+#     else:
+#         
+    print('Get static information.')
     newlist= [[]for i in range(att_num)]
     freqrow1=[[]for i in range(att_num)]
     freqnum1=[[]for i in range(att_num)]
@@ -159,6 +226,9 @@ def get_static_info(att_num,node_num,rowlist,multilist):
             for i2 in range(len(freqnum2[ii])):
                 freqrate2[ii].append(1.0*freqnum2[ii][i2]/node_num)
             ii=ii+1
+    
+#         with open('C:\Users\Ren\workspace2\DisHD\output\\'+input_str+'originstatic.pickle', 'w') as memoryfile:
+#             pickle.dump([freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist], memoryfile)
                
     return freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist
 
@@ -173,7 +243,7 @@ def set_rappor_params(num_bloombits,num_hash,col,f):
     params.prob_p = 0.0
     params.prob_q = 1.0
     rand=rappor.MockRandom([0.0, 0.6, 0.0], params)
-    secret=str(col)
+    secret=str(random)
     #print(rand)
     #secret=random
     e=rappor2.Encoder(params, 0, secret, rand)
@@ -195,8 +265,32 @@ def get_B(str_x,e):
         bit_array.append(int(each_char))  
     return bit_array
 
+def get_B_basic(strx,e,rand_base=0):
+    leng=e.params.num_bloombits
+    bit_array=[0 for i in range(leng)]
+    loc=int(strx)-rand_base-1
+    bit_array[loc]=1
+    return bit_array
+
+def get_S_basic(strx,e,rand_base=0):
+    leng=e.params.num_bloombits
+    f=e.params.prob_f
+    bit_array=get_B_basic(strx, e, rand_base=0)
+    for i in range(leng):
+        if random.random()<=1-f :
+            continue
+        else: 
+            if random.random()<=0.5:
+                bit_array[i]=0
+            else:
+                bit_array[i]=1
+    return bit_array              
+ 
+  
 # for i in range(10):
-#     set_rappor_params(32, 4, 0.5)
+# e=set_rappor_params(32, 4, 2,0.5)
+# print(get_B_basic('32', e))
+# print(get_S_basic('2', e))
 
 # att_num,node_num,rowlist,multilist=get_file_info(4,10000)
 # freqrow1,freqnum1,freqrate1,freqrow2,freqnum2,freqrate2,newlist=get_static_info(att_num, node_num, rowlist, multilist)

@@ -11,7 +11,7 @@ import random
 from copy import copy
 from Estimate_Joint_Distribution import att_combin, estimate_2d,\
     list_product,row_product, rappor_list_paste, true_joint_distribution, estimate_2d2,\
-    row_list_product
+    row_list_product,estimate_2d6
 import Get_Rappor
 
 
@@ -78,7 +78,7 @@ def simple_conditiondata_combin(data_list, loc_list):
 
 #def pairwise_independent_margin(first_att_index,second_att_index,p_comb_list,row_list):
 
-def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):   
+def independent_marginal(clique,bit_list,bit_cand_list,row_list,bitsum_list,f,dt):   
     ##################################################################
     # To generate independent probability and possible list for sampling
     leng=len(clique)
@@ -87,7 +87,8 @@ def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):
     if leng<=2:
         att_index1=clique[0]
         att_index2=clique[leng-1]
-        proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], f, dt)
+        proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2],clique, f, dt)
+        #proe=estimate_2d6(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], bitsum_list,clique,f, dt)
         proleng=len(proe)
         for i in range(proleng):    
             pro.extend(proe[i])
@@ -99,10 +100,10 @@ def independent_marginal(clique,bit_list,bit_cand_list,row_list,f,dt):
         #print(att_index1)
         #print(att_indexs)
         att_rappor_list_combine,att_signal_list_combine,att_row_list_combine=att_combin(bit_list,bit_cand_list,row_list,att_indexs)
-        #print('rowlist combine',att_row_list_combine)
+        #print('rowlist combine',att_row_list_combine)    att_combin(bit_list,bit_cand_list,row_list,att_indexs)
         #print(att_row_list_combine)
         #proe=estimate_2d2(bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique)
-        proe=estimate_2d(bit_list[att_index1],att_rappor_list_combine,bit_cand_list[att_index1],att_signal_list_combine,f,dt)
+        proe=estimate_2d(bit_list[att_index1],att_rappor_list_combine,bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique,f,dt)
         proleng=len(proe)
         for i in range(proleng):    
             pro.extend(proe[i])
@@ -161,7 +162,40 @@ def independent_marginal2(clique,bit_list,bit_cand_list,row_list,bitsum_list,f,d
     #print(pro)
     return some_list, pro
 
-def conditional_marginal(condition_list,clique,bit_list,bit_cand_list,row_list,f,dt):   
+def independent_marginal3(clique,bit_list,bit_cand_list,row_list,bitsum_list,f,dt):   
+    ##################################################################
+    # To generate independent probability and possible list for sampling
+    leng=len(clique)
+    pro=[]
+    some_list=[]
+    if leng<=2:
+        att_index1=clique[0]
+        att_index2=clique[leng-1]
+        #proe=estimate_2d(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], f, dt)
+        proe=estimate_2d6(bit_list[att_index1], bit_list[att_index2], bit_cand_list[att_index1], bit_cand_list[att_index2], bitsum_list,clique,f, dt)
+        proleng=len(proe)
+        for i in range(proleng):    
+            pro.extend(proe[i])
+        some_list=row_list[clique[0]]
+        
+    else:
+        att_index1=clique[0]
+        att_indexs=clique[1:(leng)]
+        #print(att_index1)
+        #print(att_indexs)
+        att_rappor_list_combine,att_signal_list_combine,att_row_list_combine=att_combin(bit_list,bit_cand_list,row_list,att_indexs)
+        #print('rowlist combine',att_row_list_combine)    att_combin(bit_list,bit_cand_list,row_list,att_indexs)
+        #print(att_row_list_combine)
+        #proe=estimate_2d2(bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique)
+        proe=estimate_2d6(bit_list[att_index1],att_rappor_list_combine,bit_cand_list[att_index1],att_signal_list_combine,bitsum_list,clique,f,dt)
+        proleng=len(proe)
+        for i in range(proleng):    
+            pro.extend(proe[i])
+        some_list=list_product(row_list[clique[0]],att_row_list_combine)
+        #print('estimate:',proe)
+    return some_list, pro
+
+def conditional_marginal(condition_list,clique,bit_list,bit_cand_list,row_list,bitsum_list,f,dt):   
     ####################################################################################
     # To generate conditional probability and acceptable items for sampling
     pro=[]
@@ -188,7 +222,7 @@ def conditional_marginal(condition_list,clique,bit_list,bit_cand_list,row_list,f
         att_rappor_list_combine2,att_signal_list_combine2,att_row_list_combine2=att_combin(bit_list,bit_cand_list,row_list,att_indexs2)
     
     
-    pro=estimate_2d(att_rappor_list_combine1,att_rappor_list_combine2,att_signal_list_combine1,att_signal_list_combine2,f,dt)
+    pro=estimate_2d(att_rappor_list_combine1,att_rappor_list_combine2,att_signal_list_combine1,att_signal_list_combine2,bitsum_list,clique,f,dt)
     
     condition_some_list=att_row_list_combine1
     some_list=att_row_list_combine2
@@ -196,7 +230,7 @@ def conditional_marginal(condition_list,clique,bit_list,bit_cand_list,row_list,f
     #print(condition_some_list)
     #print(some_list)
     #print('true:',true_joint_distribution(bit_list,row_list,clique))
-    print('estimate:',pro)
+    #print('estimate:',pro)
  
     return condition_some_list,some_list, pro 
 
@@ -301,13 +335,14 @@ def pair_independe_draw(new_data_list,origin_node_num,clique,p_single_list,p_com
                    
     return new_data_list
 
-def independe_draw(ISflag,new_data_list,origin_node_num,clique,bit_list,bit_cand_list,row_list,p_single_list,p_comb_list,f,dt):
+def independe_draw(ISflag,new_data_list,origin_node_num,clique,bit_list,bitsum_list,bit_cand_list,row_list,p_single_list,p_comb_list,f,dt):
     if ISflag==1:
-        some_list, pro=independent_marginal(clique, bit_list, bit_cand_list, row_list, f, dt)
+        some_list, pro=independent_marginal(clique, bit_list, bit_cand_list, row_list,bitsum_list, f, dt)
         #some_list, pro=independent_marginal2(clique, bit_list, bit_cand_list, row_list, f, dt)
         for i in range(origin_node_num):
             items=independent_random_pick(some_list, pro)
-            for j in range(len(clique)):
+            #print(items)
+            for j in range(len(items)):
                 new_data_list[i][clique[j]]=items[j]
     else:
         new_data_list=pair_independe_draw(new_data_list,origin_node_num,clique,p_single_list,p_comb_list,row_list)
@@ -363,11 +398,11 @@ def pair_conditional_draw(new_data_list,origin_node_num,condition_list,clique,p_
     
     
 
-def conditional_draw(ISflag,new_data_list,origin_node_num,condition_list,clique,bit_list,bit_cand_list,row_list,p_single_list,p_comb_list,f,dt):
+def conditional_draw(ISflag,new_data_list,origin_node_num,condition_list,clique,bit_list,bitsum_list,bit_cand_list,row_list,p_single_list,p_comb_list,f,dt):
     if ISflag==1:
         some_clique=list(set(clique)-set(condition_list))
         some_clique.sort()
-        condition_some_list,some_list, pro=conditional_marginal2(condition_list, clique, bit_list, bit_cand_list, row_list, f, dt)
+        condition_some_list,some_list, pro=conditional_marginal(condition_list, clique, bit_list, bit_cand_list, row_list,bitsum_list, f, dt)
         for i in range(origin_node_num):
             new_data=new_data_list[i]
             items=conditional_random_pick(new_data,condition_list, condition_some_list, some_list, pro)

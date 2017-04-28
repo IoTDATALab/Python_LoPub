@@ -1,4 +1,5 @@
-from sklearn import svm  
+from sklearn import svm 
+from sklearn.ensemble import RandomForestClassifier
 import random
 import copy
 import Get_Params
@@ -47,6 +48,7 @@ def Data_construct(data_list,column_num,ratio):
     
     node_num=len(data_list)
     n=int(ratio*node_num)
+    random.seed(1)
     sample_order=random.sample(range(node_num),n)
     train_data=[]
     test_data=[]
@@ -63,11 +65,14 @@ def Data_construct(data_list,column_num,ratio):
     return train_x,train_y,test_x,test_y,single_error
 
 def SVM_evaluation(train_x,train_y,test_x,test_y):    
-    clf=svm.SVC()
-    clf.fit(train_x,train_y)
+    if len(set(train_y))<2:
+        svm_y=[train_y[0] for i in range (len(test_x))]
+    else:
+        clf=svm.SVC()
+        clf.fit(train_x,train_y)
     
-    svm_y=clf.predict(test_x)
-    svm_y=svm_y.tolist()
+        svm_y=clf.predict(test_x)
+        svm_y=svm_y.tolist()
     
     right_num=0.0
     for i in range(len(test_y)):
@@ -76,6 +81,11 @@ def SVM_evaluation(train_x,train_y,test_x,test_y):
     right_ratio=right_num/len(test_y)
     return right_ratio
 
+def RF_evaluation(train_x,train_y,test_x,test_y):
+    clf=RandomForestClassifier()
+    clf.fit(train_x,train_y)
+    right_ratio=clf.score(test_x,test_y)
+    return right_ratio
 # def SVM_evaluation(data_list,column_num,ratio):
 #     
 #     node_num=len(data_list)
@@ -105,13 +115,16 @@ def SVM_evaluation(train_x,train_y,test_x,test_y):
 #     right_ratio=right_num/len(test_data)
 #     return right_ratio
 
-def SVM_ratio(train_x,train_y,test_x,test_y,loop_time):
+def SVM_ratio(train_x,train_y,test_x,test_y,loop_time,classifier):
     rightratio=0.0
     for i in range(loop_time):
         #print('now processing loop:')
         if i%5==0:
             print(i),
-        right_ratio=SVM_evaluation(train_x,train_y,test_x,test_y)
+        if classifier=='SVM':
+            right_ratio=SVM_evaluation(train_x,train_y,test_x,test_y)
+        else:
+            right_ratio=RF_evaluation(train_x,train_y,test_x,test_y)
         rightratio+=right_ratio 
     meanratio=rightratio/(1.0*loop_time)
     return meanratio   
