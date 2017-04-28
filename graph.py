@@ -12,13 +12,11 @@ def parents(adj_mat, i):
     """
     Returns the indices of the parent nodes of the input node, i, in the
     given adjacency matrix.
-
     Parameters
     ----------
     adj_mat: Numpy ndarray
         Adjacency matrix. If adj_mat[i, j] = 1, there exists a directed
         edge from node i to node j.
-
     i: Int
         The index of the node whose parents are to be found.
     """
@@ -40,13 +38,11 @@ def children(adj_mat, i):
     """
     Returns the indices of the children nodes of the input node, i, in the
     given adjacency matrix.
-
     Parameters
     ----------
     adj_mat: Numpy ndarray
         Adjacency matrix. If adj_mat[i, j] = 1, there exists a directed
         edge from node i to node j.
-
     i: Int
         The index of the node whose parents are to be found.
     """
@@ -71,13 +67,11 @@ def neighbours(adj_mat, i):
     """
     Returns the indices of the neighbours nodes of the input node, i, in the
     given adjacency matrix.
-
     Parameters
     ----------
     adj_mat: Numpy ndarray
         Adjacency matrix. If adj_mat[i, j] = 1, there exists a directed
         edge from node i to node j.
-
     i: Int
         The index of the node whose parents are to be found.
     """
@@ -94,13 +88,11 @@ def family(adj_mat, i):
     """
     Returns the indices of the family nodes of the input node, i, in the
     given adjacency matrix.
-
     Parameters
     ----------
     adj_mat: Numpy ndarray
         Adjacency matrix. If adj_mat[i, j] = 1, there exists a directed
         edge from node i to node j.
-
     i: Int
         The index of the node whose parents are to be found.
     """
@@ -113,7 +105,6 @@ def topological_sort(A):
     """
     Returns the indices of the nodes in the graph defined by the adjacency
     matrix A in topological order.
-
     Parameters
     ----------
     A: Scipy sparse csc_matrix
@@ -151,7 +142,6 @@ def moralize(G):
     """
     Converts a directed graph to an undirected graph, by connecting the
     parents of every node together.
-
     Parameters
     ----------
     G: Numpy ndarray
@@ -174,12 +164,10 @@ def moralize(G):
 def setdiag(G, val):
     """
     Sets the diagonal elements of a matrix to a specified value.
-
     Parameters
     ----------
     G: A 2D matrix or array.
         The matrix to modify.
-
     val: Int or float
         The value to which the diagonal of 'G' will be set.
     """
@@ -194,33 +182,26 @@ def graph_to_jtree(model_graph, ns):
     This function triangulates a moral graph and obtains a junction tree
     from the cliques of the triangulated graph by computing the maximum
     spanning tree for those cliques.
-
     Parameters
     ----------
     model_graph: Numpy ndarray
         MG[i,j] = 1 iff there is an edge between node i and node j.
-
     ns: List
         The node sizes, where ns[i] = the number of discrete values node i
         can take on [1 if observed].
-
     Output
     ------
     jtree: Numpy ndarray
         A matrix reprsenting the edges in the junction tree. jtree(i,j)=1
         iff there is an edge between clique i and clique j.
-
     root: Int
         The index of the root clique.
-
     cliques: List
         A list of lists of the indices of each clique. cliques[i] = the
         indices of the nodes in clique i.
-
     B: Numpy ndarray
         A map of which clique each node appears in, B[i,j] = 1 iff node j
         occurs in clique i.
-
     w: List
         The weights of the cliques, w[i] = weight of clique i.
     """
@@ -247,33 +228,27 @@ def graph_to_jtree(model_graph, ns):
 def best_first_elim_order(G, node_sizes, stage=[]):
     """
     This function greedily searches for an optimal elimination order.
-
     Find an order in which to eliminate nodes from the graph in such a way
     as to try and minimize the weight of the resulting triangulated graph.
     The weight of a graph is the sum of the weights of each of its cliques;
     the weight of a clique is the product of the weights of each of its
     members; the weight of a node is the number of values it can take on.
-
     Since this is an NP-hard problem, we use the following greedy heuristic:
     At each step, eliminate that node which will result in the addition of
     the least number of fill-in edges, breaking ties by choosing the node
     that induces the lighest clique.
-
     For details, see
     - Kjaerulff, "Triangulation of graphs -- algorithms giving small total
         state space", Univ. Aalborg tech report, 1990 (www.cs.auc.dk/~uk)
     - C. Huang and A. Darwiche, "Inference in Belief Networks: A procedural
         guide", Intl. J. Approx. Reasoning, 11, 1994
-
     Parameters
     ----------
     G: Numpy ndarray
         G[i,j] = 1 iff there is an edge between node i and node j.
-
     node_sizes: List
         The node sizes, where ns[i] = the number of discrete values
         node i can take on [1 if observed].
-
     stage: List
         stage[i] is a list of the nodes that must be eliminated at i'th
         stage.
@@ -373,12 +348,10 @@ def triangulate(G, order):
     cliques, we save each induced cluster (created by adding connecting
     neighbors) that is not a subset of any previously saved cluster. (A
     cluster is a complete, but not necessarily maximal, set of nodes.)
-
     Parameters
     ----------
     G: Numpy ndarray
         G[i,j] = 1 iff there is an edge between node i and node j.
-
     order: List
         The order in which to eliminate the nodes.
     """
@@ -425,17 +398,14 @@ def triangulate(G, order):
 def cliques_to_jtree(cliques, ns):
     """
     This function produces an optimal junction tree from a set of cliques.
-
     A junction tree is a tree that satisfies the jtree property, which says:
     for each pair of cliques U, V with intersection S, all cliques on the
     path between U and V contain S. (This ensures that local propagation
     leads to global consistency.)
-
     The best jtree is the maximal spanning tree which minimizes the sum of
     the costs on each edge. The cost on an edge connecting cliques i and j,
     is the weight of the seperator set between the two cliques, defined as
     the intersection between cliques i and j.
-
     Therefore, to determine the cost of an edge connecting 2 cliques:
     C[i] = clique i, and
     C[j] = clique j,
@@ -445,35 +415,27 @@ def cliques_to_jtree(cliques, ns):
     weights of each node in S, where the weight of a node is the number of
     values that node can take on. Therefore the cost of an edge connecting
     clique i and clique j is: cost[i, j] = W[S[i, j]].
-
     For details, see
     - Jensen and Jensen, "Optimal Junction Trees", UAI 94.
-
     Parameters
     ----------
     cliques: List
         cliques[i] contains the indices of the nodes in clique i.
-
     ns: List
         The node sizes, ns[i] is the number of values node i can take on.
-
     Ouput
     -----
     jtree: Numpy ndarray
         A matrix reprsenting the edges in the junction tree. jtree(i,j)=1
         iff there is an edge between clique i and clique j.
-
     root: Int
         The index of the root clique.
-
     cliques: List
         A list of lists of the indices of the nodes in each clique. cliques[i] =
         the indices of the nodes in clique i.
-
     B: Numpy ndarray
         A map of which clique each node appears in, B[i,j] = 1 iff node j
         occurs in clique i.
-
     w: List
         The weights of the cliques, w[i] = weight of clique i.
     """
@@ -502,21 +464,17 @@ def minimum_spanning_tree(C1, C2):
     This function finds the minimum spanning tree using Prim's algorithm.
     We assume that absent edges have 0 cost. To find the maximum spanning
     tree, use -1*C.
-
     We partition the nodes into those in U and those not in U.
     closest[i] is the vertex in U that is closest to i in V-U.
     lowcost[i] is the cost of the edge [i, closest[i]], or infinity if i has
     been used.
-
     For details see
         - Aho, Hopcroft & Ullman 1983, "Data structures and algorithms",
         p 237.
-
     Parameters
     ----------
     C1: Numpy matrix
         C1[i,j] is the primary cost of connecting i to j.
-
     C2: Numpy matrix
         C2[i,j] is the (optional) secondary cost of connecting i to j, used
         to break ties.
@@ -555,27 +513,21 @@ def mk_rooted_tree(G, root):
     """
     This function reproduces G as a directed tree pointing away from the
     root.
-
     Parameters
     ----------
     G: Numpy ndarray
         G[i,j] = 1 iff there is an edge between node i and node j.
-
     root: Int
         The index of the root node.
-
     Output
     ------
     T: Numpy ndarray
         The rooted tree, T[i,j] = 1 iff there is an edge between node i and
         node j.
-
     pre: List
         The pre visting order.
-
     post: List
         The post visting order.
-
     cycle: Int
         Equals 1 if there is a cycle in the rooted tree.
     """
