@@ -61,7 +61,7 @@ bloombit=32
 hashbit=16
 dt=0.01
 readlimit=60000
-samplerate=1
+samplerate=0.01
 sparse_rate=0.0
 for file_id in [4]:
     

@@ -8,7 +8,7 @@ import pickle
 import csv
 from sklearn.linear_model import Lasso, LinearRegression, Ridge
 from sklearn.linear_model.bayes import BayesianRidge
-from scikits.statsmodels.regression.linear_model import OLS
+#from scikits.statsmodels.regression.linear_model import OLS
 #from sklearn.linear_model.coordinate_descent import ElasticNet
 #from sklearn.linear_model.coordinate_descent import enet_path
 #from Evaluation_Marginal import readlimit

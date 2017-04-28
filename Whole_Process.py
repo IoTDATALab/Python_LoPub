@@ -28,7 +28,7 @@ ISflag=1
 
 
 
-file_id=3
+file_id=4
 fai_C=0.55   #from 0.2, 0.3, 0.4, 0.5
 #f=0.5 # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
 # bloombit=128
@@ -37,7 +37,7 @@ bloombit=32
 hashbit=4
 dt=0.01
 readlimit=80000
-samplerate=0.1  # from 0.01, 0.05, 0.1, 0.5, 1
+samplerate=0.01  # from 0.01, 0.05, 0.1, 0.5, 1
 sparse_rate=0.0
 if sparse_rate==0.0:
     get_rid_flag=False
