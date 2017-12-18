@@ -33,8 +33,8 @@ def get_file_info(input_id, readlimit,samplerate):
     print('Reading original data.')
 
     input_id=str(input_id)
-    input_data='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.dat'
-    input_domain='C:\Users\Ren\workspace2\DisHD\data\Data'+input_id+'-coarse.domain'
+    input_data='E:\Xuebin\Documents\GitHub\python_highdim\data\Data'+input_id+'-coarse.dat'
+    input_domain='E:\Xuebin\Documents\GitHub\python_highdim\data\Data'+input_id+'-coarse.domain'
 ##############################################################################################
 #Get the attributes number and nodes number
     fd=open(input_domain,'r')

@@ -29,12 +29,12 @@ ISflag=1
 
 
 file_id=4
-fai_C=0.55   #from 0.2, 0.3, 0.4, 0.5
+fai_C=0.25   #from 0.2, 0.3, 0.4, 0.5
 #f=0.5 # from 0.1, 0.2, 0.3, 0.4, 0.5  *********
 # bloombit=128
 # hashbit=16
-bloombit=32
-hashbit=4
+bloombit=4
+hashbit=1
 dt=0.01
 readlimit=80000
 samplerate=0.01  # from 0.01, 0.05, 0.1, 0.5, 1
@@ -43,11 +43,11 @@ if sparse_rate==0.0:
     get_rid_flag=False
 else:
     get_rid_flag=True
-for file_id in [3]:
+for file_id in [4]:
     curr_time1=time.time()
     if file_id==4:
         #fai_list=[0.1,0.2,0.3,0.4,0.5]
-        fai_list=[0.1]
+        fai_list=[0.2]
         col_list=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     if file_id==2:
         bloombit=128
@@ -64,7 +64,7 @@ for file_id in [3]:
         col_list=[2,9,22,23]
     for fai_C in fai_list:
         
-        for f in [0.1]:
+        for f in [0.1, 0.3, 0.5, 0.7, 0.9]:
         #for f in [0.1, 0.5, 0.9, 0.95, 0.99]:
                 
             
@@ -73,7 +73,7 @@ for file_id in [3]:
             
             param_string='D_'+str(file_id)+'_C_'+str(fai_C)+'_f_'+str(f)+'_B_'+str(bloombit)+'_H_'+str(hashbit)+'_S_'+str(samplerate)+'_R_'+str(readlimit)
             #print(param_string)
-            os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+            os.chdir('E:\Xuebin\Documents\GitHub\python_highdim\output')
            
             folder_h = param_string
             isExists=os.path.exists(folder_h)
@@ -106,7 +106,7 @@ for file_id in [3]:
                     fid_csv = csv.writer(fid)
                     fid_csv.writerows(True_CorMat)
     
-    '''           
+    #'''           
                 TrueDG=numpy.array(TrueDepG)
                 #print(True_CorMat)
                 print(TrueDG)
@@ -320,7 +320,7 @@ for file_id in [3]:
                 elapse_time=curr_time2-curr_time1
                 write_list=[[fai_C,f,DGrr,DGfp,DGtn,svm_ratio1,svm_ratio2,rf_ratio1,rf_ratio2,sparse_rate,samplerate,elapse_time]]
                 print(write_list)
-                os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+                os.chdir('E:\Xuebin\Documents\GitHub\python_highdim\output')
                 with open('file-'+str(file_id)+'-ClassifierEM.csv','a') as fid:
                     fid_csv = csv.writer(fid)
                     fid_csv.writerows(write_list)
@@ -350,4 +350,4 @@ for file_id in [3]:
             
             #multilist2,node_num2,att_num2=Get_newdata(20,true_node_num, 0.1)
                
-     '''
+     #'''

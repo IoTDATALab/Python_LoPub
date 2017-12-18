@@ -59,7 +59,7 @@ def rappor_process(num_bloombits,num_hash,f,num_att,num_node,origin_node_num,lis
     
     
     print('count time:',last_time)  
-    os.chdir('C:\Users\Ren\workspace2\DisHD\output')
+    os.chdir('E:\Xuebin\Documents\GitHub\python_highdim\output')
     with open('file-'+str(file_id)+'-marginal.csv','a') as fid:
                     fid_csv = csv.writer(fid)
                     fid_csv.writerows([[last_time]])   

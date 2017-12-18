@@ -82,7 +82,7 @@ for file_id in [4]:
             bloombit=32
             hashbit=4
             samplerate=0.1
-            cluster_list=[att3_clique,att5_clique]
+            cluster_list=[att2_clique,att5_clique]
         else:
             bloombit=128
             hashbit=4
@@ -90,7 +90,7 @@ for file_id in [4]:
             cluster_list=[att2_clique,att3_clique]
         
         #for f in [0.98,0.97,0.96]:
-        for f in [0.1,0.3,0.5,0.7,0.9,0.7,0.75,0.82,0.88,0.94]:
+        for f in [0.5,0.3,0.5,0.7,0.9,0.7,0.75,0.82,0.88,0.94]:
         #for f in [0.845,0.922,0.984,0.992,0.998]: #epsilon=10,5,1,0.5,0.1
         #for dpepsilon in [5,4,3,2,1]:
             #f=2/(numpy.exp(dpepsilon/(2.0*hashbit))+1)
@@ -135,7 +135,7 @@ for file_id in [4]:
                     err_list3=[]
                     for eachclique in each_k:
                         true_list,true_pro=true_joint_distribution(multilist2, rowlist2, eachclique)
-                        #print('true:',true_pro)
+                        print('true:',true_pro)
                         curr_time1=time.time()
                         
                         some_list,pro1=independent_marginal(eachclique, bit_list3, bit_cand_list3, rowlist2,bitsum_list3, f, dt)
@@ -143,7 +143,7 @@ for file_id in [4]:
                         #pro1=true_pro
                         #some_list,pro=independent_marginal2(eachclique, bit_list3, bit_cand_list3, rowlist_sparse, bitsum_list3, f, dt)
                         #elapse=time.time()-curr_time
-                        #print('esti1:',pro1,etime1)
+                        print('esti1:',pro1,etime1)
                         curr_time2=time.time()
                         some_list,pro2=independent_marginal2(eachclique, bit_list3, bit_cand_list3, rowlist2, bitsum_list3, f, dt)
                         curr_time3=time.time()
@@ -153,8 +153,8 @@ for file_id in [4]:
                         etime2+=curr_time3-curr_time2
                         etime3+=curr_time4-curr_time3
 
-                        #print('esti1:',pro1)
-                        #print('esti2:',pro2)
+                        print('esti2:',pro2)
+                        print('esti3:',pro3)
                         i+=1
                 
                         err1=get_avd(pro1, true_pro)
