@@ -47,6 +47,7 @@ def children(adj_mat, i):
         The index of the node whose parents are to be found.
     """
     """Check if this is perhaps a sparse matrix"""
+    i=int(i)
     if type(adj_mat) != np.ndarray:
         adj_mat = adj_mat.tocsr()
         posi = np.array((adj_mat[i, :].todense() == 1)).squeeze()
@@ -75,6 +76,7 @@ def neighbours(adj_mat, i):
     i: Int
         The index of the node whose parents are to be found.
     """
+    i=int(i)
     kids = np.array(children(adj_mat, i))
     folks = np.array(parents(adj_mat,i))
     if issubset(kids, folks) and issubset(folks, kids):
@@ -364,6 +366,7 @@ def triangulate(G, order):
     for i in range(0,n):
         """Obtain the index of the next node to be eliminated"""
         u = order[0,i]
+        u = int(u)
         U = find(eliminated == 0)
         #nodes = np.intersect1d_nu(neighbours(G, u), U)#################################################################################################################################################
         nodes = np.intersect1d(neighbours(G, u), U)
@@ -373,7 +376,9 @@ def triangulate(G, order):
         together.
         """
         for i in nodes:
+            i=int(i)
             for j in nodes:
+                j=int(j)
                 G[i, j] = 1
         G = setdiag(G, 0)
 
@@ -444,8 +449,12 @@ def cliques_to_jtree(cliques, ns):
     B = np.zeros((num_cliques, ns.shape[1]))
 
     for i in range(0, num_cliques):
-        B[i, cliques[i].tolist()] = 1
-        w[i] = np.prod(ns[0, cliques[i].tolist()])
+        i=int(i)
+        cliquetemp=map(int,cliques[i])
+        B[i, cliquetemp] = 1
+        w[i] = np.prod(ns[0, cliquetemp])
+        #B[i, cliques[i].tolist()] = 1
+        #w[i] = np.prod(ns[0, cliques[i].tolist()])
 
     C1 = np.mat(B) * np.mat(B).T
     C1 = setdiag(C1, 0)
@@ -493,8 +502,9 @@ def minimum_spanning_tree(C1, C2):
     for i in range(1,n):
         ks = find(np.array(lowcost1) == np.min(lowcost1))
         k = ks[0, np.argmin(lowcost2[0, ks])]
-        A[k, closest[0,k]] = 1
-        A[closest[0,k], k] = 1
+        k=int(k)
+        A[int(k), int(closest[0,int(k)])] = 1
+        A[int(closest[0,k]), k] = 1
         lowcost1[0,k] = np.nan_to_num(np.Inf)
         lowcost2[0,k] = np.nan_to_num(np.Inf)
         used[0,k] = 1

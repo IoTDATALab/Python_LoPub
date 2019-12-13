@@ -60,7 +60,7 @@ for file_id in [4]:
         bloombit=128
         hashbit=4
         #fai_list=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-        fai_list=[0.2]
+        fai_list=[0.1]
         col_list=[2,9,22,23]
     for fai_C in fai_list:
         
@@ -73,7 +73,7 @@ for file_id in [4]:
             
             param_string='D_'+str(file_id)+'_C_'+str(fai_C)+'_f_'+str(f)+'_B_'+str(bloombit)+'_H_'+str(hashbit)+'_S_'+str(samplerate)+'_R_'+str(readlimit)
             #print(param_string)
-            os.chdir('E:\Xuebin\Documents\GitHub\python_highdim\output')
+            os.chdir('C:\Users\Xuebin\Documents\GitHub\python_highdim\output')
            
             folder_h = param_string
             isExists=os.path.exists(folder_h)
@@ -320,7 +320,7 @@ for file_id in [4]:
                 elapse_time=curr_time2-curr_time1
                 write_list=[[fai_C,f,DGrr,DGfp,DGtn,svm_ratio1,svm_ratio2,rf_ratio1,rf_ratio2,sparse_rate,samplerate,elapse_time]]
                 print(write_list)
-                os.chdir('E:\Xuebin\Documents\GitHub\python_highdim\output')
+                os.chdir('C:\Users\Xuebin\Documents\GitHub\python_highdim\output')
                 with open('file-'+str(file_id)+'-ClassifierEM.csv','a') as fid:
                     fid_csv = csv.writer(fid)
                     fid_csv.writerows(write_list)
